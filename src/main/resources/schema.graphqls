@@ -1,0 +1,178 @@
+type Project {
+	projectId: Int
+	projectName: String
+    projectCode: String
+	description: String
+	experiments: [Experiment]
+	sampleSets: [SampleSet]
+}
+
+type Experiment {
+	exptId: Int
+	exptCode: String
+	exptName: String
+	exptDescription: String
+	technology: String
+	techPlatform: String
+}
+
+type Sample {
+	sampleId: ID!
+	sampleCode: String
+	sampleName: String
+	description: String
+	baseCellId: Int
+	targetCellId: Int
+	treatments: [Treatment]
+}
+
+type Treatment {
+	treatmentId: ID!
+	sampleId: Int!
+	varName: String
+	varType: String
+	varData: String
+	varUnit: String
+	startTime: Float
+	endTime: Float
+	timeUnit: String	
+}
+
+type SampleToSampleSetLinker {
+	sampleSetId: Int
+	sampleId: Int
+	ordinal: Int
+}
+
+type SampleSet {
+	sampleSetId: ID
+	sampleSetCode: String
+	setName: String
+	projectId: Long
+	exptId: Long
+	investigatorId: Long
+	isFullExperimentSet: Int
+	generationProcess: String
+	samples: [Sample]
+	linkages: [SampleToSampleSetLinker]
+}
+
+type Cell {
+	cellTypeId: Int
+	cellLineAbbr: String
+	cellType: String
+	organism: String
+	tissueOrigin: String
+	atccId: String
+	description: String
+}
+
+type Gene {
+	geneId: ID
+	ensemblId: String
+	ensemblStableId: String
+	extGeneName: String
+	geneSymbol: String
+	description: String
+	geneType: String
+	ensemblVers: String
+	ensemblVersNum: Int
+	chrName: String
+	startPos: Int
+	endPos: Int
+	strand: Int
+}
+
+type GeneSet {
+	geneSetId: ID
+	projectId: Int
+	exptId: Int
+	sampleSetId: Int
+	geneSetName: String
+	analysisNotes: String
+	biologyNotes: String
+	genes: [Gene]
+	profiles: [ExpressionProfile]
+}
+
+type ExpressionProfile {
+	geneId: Int
+	sampleSetId: Long
+	ensemblId: String
+	extGeneName: String
+	geneDescription: String
+	rawCounts: [Int]
+	normCounts: [Float]
+	scaledNormCounts: [Float]
+}
+
+type AnalysisConditionGroup {
+	analysisGroupId: ID
+	parentAnalysisId: Long
+	sampleSetId: Long
+	sampleSet: SampleSet
+	groupName: String
+	analysisChannel: String	
+}
+
+
+type RNASeqAnalysis {
+	analysisId: ID
+	analysisName: String
+	description: String
+	exptId: Int
+	projectId: Int
+	analysisDate: String
+	conditionGroups: [AnalysisConditionGroup]
+}
+
+type RNASeqDERecord {
+	deRecordId: ID
+	analysisId: Int
+	geneId: Int
+	baseMeanA: Float
+	baseMeanB: Float
+	LFC: Float
+	pValue: Float
+	FDR: Float
+}
+
+
+type Query {
+	projects: [Project]
+	project(projectID: Int): Project
+
+	experiments: [Experiment]
+	experiment(exptId: Int): Experiment
+	experimentByExptCode(exptCode: String): Experiment
+
+	cells: [Cell]
+	cell(cellTypeId: Int): Cell
+	
+	sample(sampleId: Int): Sample
+	
+	treatmentsBySampleId(sampleId: Int): [Treatment]
+
+	gene(geneId: Int): Gene
+    geneByExtGeneNameAndVers(extGeneName: String, vers: Int): Gene
+
+	genesets: [GeneSet]	
+	geneset(geneSetId: Int): GeneSet
+	genesetsBySampleSetId(sampleSetId: Int): [GeneSet]
+	genesetsByExptId(exptId: Int): [GeneSet]
+	genesetsByProjectId(projectId: Int): [GeneSet]
+	
+	sampleset(setId: Int): SampleSet
+	sampleSetsByProjectId(projectId: Int): [SampleSet]
+	sampleSetsByProjectCode(projectCode: String): [SampleSet]
+
+	analysisgroup(groupId: Int): AnalysisConditionGroup
+	analysisGroupsById(analysisId: Int): [AnalysisConditionGroup]
+
+	rnaseqanalyses: [RNASeqAnalysis]
+	rnaseqanalysis(analysisId: Int): RNASeqAnalysis
+	
+	rnaseqDeRecord(deRecordId: Int): RNASeqDERecord
+	rnaseqDeRecordsByAnalysisId(analysisId: Int): [RNASeqDERecord]
+	rnaseqDeRecordByGeneIdAndAnalysisId(geneId:Int, analysisId:Int): RNASeqDERecord
+}
